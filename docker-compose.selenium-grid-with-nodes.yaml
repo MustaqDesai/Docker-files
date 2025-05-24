@@ -1,0 +1,44 @@
+# To execute this docker compose yml file use `docker compose -f docker-compose-v3.yml up`
+# Add the `-d` flag at the end for detached execution
+# To stop the execution, hit Ctrl+C, and then `docker compose -f docker-compose-v3.yml down`
+services:
+  dev-container:
+    image: mcr.microsoft.com/devcontainers/universal:linux
+    container_name: DevContainer
+  selenium-hub:
+    image: selenium/hub
+    container_name: selenium-hub
+    #hostname: selenium-hub # Need to make nodes connect to hub host name
+    ports:
+      - "4442:4442"
+      - "4443:4443"
+      - "4444:4444"
+    #network_mode: bridge
+  chrome:
+    image: selenium/node-chrome
+    platform: linux/amd64
+    shm_size: 2gb
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+    #network_mode: bridge
+  edge:
+    image: selenium/node-edge
+    platform: linux/amd64
+    shm_size: 2gb
+    depends_on:
+      - selenium-hub
+      #- chrome
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+    #network_mode: bridge
+  firefox:
+    image: selenium/node-firefox
+    shm_size: 2gb
+    depends_on:
+      - selenium-hub
+      #- edge
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+    #network_mode: bridge  
